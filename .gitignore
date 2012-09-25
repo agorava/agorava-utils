@@ -1,11 +1,16 @@
-target
-.classpath
-.project
-.settings
+*.class
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+# Eclipse and Maven Files #
 bin
-rebel.xml
-*.sw?
-*/src/main/java/META-INF
-impl/coverage.ec
-*.DS_Store
-*.iml
+.metadata
+.settings
+.project
+.classpath
+target
+generated-source
+

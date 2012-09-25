@@ -1,0 +1,3 @@
+org.jboss.solder.bean.generic.GenericBeanExtension
+org.jboss.solder.bean.defaultbean.DefaultBeanExtension
+org.jboss.solder.unwraps.UnwrapsExtension
