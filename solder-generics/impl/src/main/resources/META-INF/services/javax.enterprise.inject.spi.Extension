@@ -1,3 +1,3 @@
-org.jboss.solder.bean.generic.GenericBeanExtension
-org.jboss.solder.bean.defaultbean.DefaultBeanExtension
-org.jboss.solder.unwraps.UnwrapsExtension
+org.agorava.utils.solder.bean.generic.GenericBeanExtension
+org.agorava.utils.solder.bean.defaultbean.DefaultBeanExtension
+org.agorava.utils.solder.unwraps.UnwrapsExtension
