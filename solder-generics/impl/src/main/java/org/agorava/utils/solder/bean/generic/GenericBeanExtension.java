@@ -200,7 +200,7 @@ public class GenericBeanExtension implements Extension {
 
     }
 
-    public static final String GENERIC_BEAN_EXTENSION_NAMESPACE = "org.jboss.solder.bean.generic.annotatedMember";
+    public static final String GENERIC_BEAN_EXTENSION_NAMESPACE = "org.agorava.utils.solder.bean.generic.annotatedMember";
 
     // A map of generic configuration types to generic beans
     // Used to track the generic bean found
@@ -254,7 +254,7 @@ public class GenericBeanExtension implements Extension {
         this.genericConfigurationPoints = new HashMap<GenericIdentifier, GenericConfigurationHolder>();
         this.genericProducerBeans = new HashMap<AnnotatedMember<?>, Bean<?>>();
         this.unwrapsMethods = Multimaps.newSetMultimap(new HashMap<Class<? extends Annotation>, Collection<AnnotatedMethod<?>>>(), GenericBeanExtension.<AnnotatedMethod<?>>createHashSetSupplier());
-        this.genericBeanQualifier = new Synthetic.SyntheticLiteral("org.jboss.solder.bean.generic.genericQualifier", Long.valueOf(0));
+        this.genericBeanQualifier = new Synthetic.SyntheticLiteral("org.agorava.utils.solder.bean.generic.genericQualifier", Long.valueOf(0));
         this.errors = new HashSet<String>();
         this.annotatedMemberInjectionProvider = new Synthetic.Provider(GENERIC_BEAN_EXTENSION_NAMESPACE);
     }

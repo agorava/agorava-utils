@@ -82,9 +82,9 @@ import org.apache.deltaspike.core.util.metadata.builder.AnnotatedTypeBuilder;
  */
 public class DefaultBeanExtension implements Extension {
 
-    private static final String QUALIFIER_NAMEPSACE = "org.jboss.solder.defaultbean";
+    private static final String QUALIFIER_NAMEPSACE = "org.agorava.utils.solder.defaultbean";
 
-    private static final String PRODUCER_QUALIFIER_NAMEPSACE = "org.jboss.solder.defaultbean.producer";
+    private static final String PRODUCER_QUALIFIER_NAMEPSACE = "org.agorava.utils.solder.defaultbean.producer";
 
     private static final Logger log = Logger.getLogger(DefaultBeanExtension.class.getName());
 
