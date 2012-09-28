@@ -44,6 +44,10 @@
 			<scope>provided</scope>
 			<version>3.15.0-GA</version>
 		</dependency>
+		<dependency>
+			<groupId>org.jboss.logging</groupId>
+			<artifactId>jboss-logging</artifactId>
+		</dependency>
 
 
 		<!-- First declare the APIs we depend on and need for compilation. 

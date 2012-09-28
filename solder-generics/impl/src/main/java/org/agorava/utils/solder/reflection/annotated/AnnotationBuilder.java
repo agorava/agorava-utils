@@ -28,6 +28,7 @@ import java.util.Set;
 import org.agorava.utils.solder.reflection.Reflections;
 import org.agorava.utils.solder.support.BeanManagerUtils;
 import org.agorava.utils.solder.support.SolderMessages;
+import org.apache.deltaspike.core.api.provider.BeanProvider;
 
 /**
  * Helper class used to build annotation stores
@@ -47,7 +48,7 @@ public class AnnotationBuilder {
         this.annotationSet = new HashSet<Annotation>();
         
         // todo: deltaspike port of SolderMessages
-        this.messages = BeanManagerUtils.getContextualInstance(SolderMessages.class);
+        messages = new SolderMessages();
     }
 
     public AnnotationBuilder add(Annotation annotation) {

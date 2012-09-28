@@ -18,13 +18,10 @@ import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedParameter;
 import javax.enterprise.inject.spi.AnnotatedType;
 
-import org.agorava.utils.solder.support.BeanManagerUtils;
 import org.agorava.utils.solder.support.SolderMessages;
 import org.apache.deltaspike.core.api.exclude.annotation.Exclude;
+import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.apache.deltaspike.core.util.ReflectionUtils;
-//import org.apache.deltaspike.core.util.metadata.builder.AnnotatedTypeImpl;
-//import org.apache.deltaspike.core.util.metadata.builder.AnnotationBuilder;
-//import org.apache.deltaspike.core.util.metadata.builder.AnnotationStore;
 import org.apache.deltaspike.core.util.securitymanaged.SetAccessiblePrivilegedAction;
 //import org.jboss.solder.messages.Messages;
 
@@ -89,9 +86,9 @@ public class SolderAnnotatedTypeBuilder<X> {
         methodParameterTypes = new HashMap<Method, Map<Integer, Type>>();
         
         // todo: deltaspike port of SolderMessages
-        messages = BeanManagerUtils.getContextualInstance(SolderMessages.class);
+        messages = new SolderMessages();
     }
-
+    
     /**
      * Add an annotation to the type declaration.
      *
