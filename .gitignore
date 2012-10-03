@@ -4,6 +4,7 @@
 *.jar
 *.war
 *.ear
+*.iml
 
 # Eclipse and Maven Files #
 bin
