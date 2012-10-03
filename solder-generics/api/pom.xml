@@ -1,31 +1,30 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-	<modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>org.agorava</groupId>
-		<artifactId>solder-generics-parent</artifactId>
-		<version>0.5.0-SNAPSHOT</version>
-		<relativePath>../pom.xml</relativePath>
-	</parent>
+    <parent>
+        <groupId>org.agorava</groupId>
+        <artifactId>solder-generics-parent</artifactId>
+        <version>0.5.0-SNAPSHOT</version>
+    </parent>
 
-	<artifactId>solder-generics-api</artifactId>
-	<name>Agorava Solder Generics API</name>
-	<description>Agorava Solder Generics API</description>
-	<url>http://agorava.org</url>
-	<packaging>jar</packaging>
+    <artifactId>solder-generics-api</artifactId>
+    <name>Agorava Solder Generics API</name>
+    <description>Agorava Solder Generics API</description>
+    <url>http://agorava.org</url>
+    <packaging>jar</packaging>
 
-	<dependencies>
-		<!-- 
-		<dependency>
-			<groupId>org.jboss.solder</groupId>
-			<artifactId>solder-logging-api</artifactId>
-		</dependency>
-		-->
-		
-		<!-- First declare the APIs we depend on and need for compilation. 
-            All of them are provided by JBoss AS 7 -->
+    <dependencies>
+        <!--
+          <dependency>
+              <groupId>org.jboss.solder</groupId>
+              <artifactId>solder-logging-api</artifactId>
+          </dependency>
+          -->
+
+        <!-- First declare the APIs we depend on and need for compilation.
+All of them are provided by JBoss AS 7 -->
 
         <!-- Import the CDI API, we use provided scope as the API is included 
             in JBoss AS 7 -->
@@ -34,8 +33,8 @@
             <artifactId>cdi-api</artifactId>
             <scope>provided</scope>
         </dependency>
-		
-	</dependencies>
+
+    </dependencies>
 
 </project>
 
