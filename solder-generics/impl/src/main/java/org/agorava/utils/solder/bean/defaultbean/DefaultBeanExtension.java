@@ -1,13 +1,12 @@
 /*
- * JBoss, Home of Professional Open Source
- * Copyright 2011, Red Hat, Inc. and/or its affiliates, and individual
- * contributors by the @authors tag. See the copyright.txt in the
- * distribution for a full listing of individual contributors.
+ * Copyright 2012 Agorava
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,44 +16,7 @@
 package org.agorava.utils.solder.bean.defaultbean;
 
 
-import static org.agorava.utils.solder.util.collections.Multimaps.newSetMultimap;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.logging.Logger;
-
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Disposes;
-import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.spi.AfterBeanDiscovery;
-import javax.enterprise.inject.spi.AfterDeploymentValidation;
-import javax.enterprise.inject.spi.AnnotatedField;
-import javax.enterprise.inject.spi.AnnotatedMethod;
-import javax.enterprise.inject.spi.AnnotatedParameter;
-import javax.enterprise.inject.spi.AnnotatedType;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.Extension;
-import javax.enterprise.inject.spi.ObserverMethod;
-import javax.enterprise.inject.spi.ProcessAnnotatedType;
-import javax.enterprise.inject.spi.ProcessBean;
-import javax.enterprise.inject.spi.ProcessObserverMethod;
-import javax.enterprise.inject.spi.ProcessProducerField;
-import javax.enterprise.inject.spi.ProcessProducerMethod;
-
 import org.agorava.utils.solder.bean.Beans;
-import org.agorava.utils.solder.bean.defaultbean.DefaultBean;
 import org.agorava.utils.solder.literal.AnyLiteral;
 import org.agorava.utils.solder.literal.DefaultLiteral;
 import org.agorava.utils.solder.reflection.HierarchyDiscovery;
@@ -63,6 +25,19 @@ import org.agorava.utils.solder.reflection.Synthetic;
 import org.agorava.utils.solder.util.collections.SetMultimap;
 import org.agorava.utils.solder.util.collections.Supplier;
 import org.apache.deltaspike.core.util.metadata.builder.AnnotatedTypeBuilder;
+
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Disposes;
+import javax.enterprise.inject.Produces;
+import javax.enterprise.inject.spi.*;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.logging.Logger;
+
+import static org.agorava.utils.solder.util.collections.Multimaps.newSetMultimap;
 //import org.jboss.solder.logging.Logger;
 //import org.jboss.solder.reflection.annotated.AnnotatedTypeBuilder;
 
@@ -79,6 +54,7 @@ import org.apache.deltaspike.core.util.metadata.builder.AnnotatedTypeBuilder;
  * qualifiers
  *
  * @author Stuart Douglas
+ * @author Ove Ranheim
  */
 public class DefaultBeanExtension implements Extension {
 
@@ -697,7 +673,7 @@ public class DefaultBeanExtension implements Extension {
         }
 
     }
-    
+
     private Set<Annotation> postProcessQualifierSet(Set<Annotation> qualifiers) {
         if (qualifiers.isEmpty()) {
             qualifiers.add(DefaultLiteral.INSTANCE);

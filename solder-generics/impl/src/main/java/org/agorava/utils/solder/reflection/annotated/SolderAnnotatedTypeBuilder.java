@@ -1,28 +1,33 @@
+/*
+ * Copyright 2012 Agorava
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.agorava.utils.solder.reflection.annotated;
 
+import org.agorava.utils.solder.support.SolderMessages;
+import org.apache.deltaspike.core.api.exclude.annotation.Exclude;
+import org.apache.deltaspike.core.util.ReflectionUtils;
+import org.apache.deltaspike.core.util.securitymanaged.SetAccessiblePrivilegedAction;
+
+import javax.enterprise.inject.spi.*;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.security.AccessController;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import javax.enterprise.inject.spi.Annotated;
-import javax.enterprise.inject.spi.AnnotatedConstructor;
-import javax.enterprise.inject.spi.AnnotatedField;
-import javax.enterprise.inject.spi.AnnotatedMethod;
-import javax.enterprise.inject.spi.AnnotatedParameter;
-import javax.enterprise.inject.spi.AnnotatedType;
-
-import org.agorava.utils.solder.support.SolderMessages;
-import org.apache.deltaspike.core.api.exclude.annotation.Exclude;
-import org.apache.deltaspike.core.api.provider.BeanProvider;
-import org.apache.deltaspike.core.util.ReflectionUtils;
-import org.apache.deltaspike.core.util.securitymanaged.SetAccessiblePrivilegedAction;
 //import org.jboss.solder.messages.Messages;
 
 /**
@@ -32,7 +37,7 @@ import org.apache.deltaspike.core.util.securitymanaged.SetAccessiblePrivilegedAc
  * can be modified: constructor, parameter, class, method and fields.
  * <p/>
  * The AnnotatedTypeBuilder is not thread safe and shall not be used concurrently!
- * 
+ * <p/>
  * Based on DS 0.3-incubating:
  * - added SolderMessages
  * - added redefined support that is only used by this class (these are dependent classes):
@@ -44,12 +49,14 @@ import org.apache.deltaspike.core.util.securitymanaged.SetAccessiblePrivilegedAc
  * -- AnnotatedParameterImpl
  * -- AnnotatedMethodImpl
  * -- AnnotatedFieldImpl
+ *
+ * @author Ove Ranheim
  */
 @Exclude
 public class SolderAnnotatedTypeBuilder<X> {
-	
-	//private transient static SolderMessages messages = Messages.getBundle(SolderMessages.class);
-	private SolderMessages messages;
+
+    //private transient static SolderMessages messages = Messages.getBundle(SolderMessages.class);
+    private SolderMessages messages;
 
     private Class<X> javaClass;
     private final AnnotationBuilder typeAnnotations;
@@ -73,8 +80,7 @@ public class SolderAnnotatedTypeBuilder<X> {
      * @see #readFromType(AnnotatedType, boolean)
      * @see #readFromType(Class, boolean)
      */
-    public SolderAnnotatedTypeBuilder()
-    {
+    public SolderAnnotatedTypeBuilder() {
         typeAnnotations = new AnnotationBuilder();
         constructors = new HashMap<Constructor<?>, AnnotationBuilder>();
         constructorParameters = new HashMap<Constructor<?>, Map<Integer, AnnotationBuilder>>();
@@ -84,19 +90,18 @@ public class SolderAnnotatedTypeBuilder<X> {
         methods = new HashMap<Method, AnnotationBuilder>();
         methodParameters = new HashMap<Method, Map<Integer, AnnotationBuilder>>();
         methodParameterTypes = new HashMap<Method, Map<Integer, Type>>();
-        
+
         // todo: deltaspike port of SolderMessages
         messages = new SolderMessages();
     }
-    
+
     /**
      * Add an annotation to the type declaration.
      *
      * @param annotation the annotation instance to add
      * @throws IllegalArgumentException if the annotation is null
      */
-    public SolderAnnotatedTypeBuilder<X> addToClass(Annotation annotation)
-    {
+    public SolderAnnotatedTypeBuilder<X> addToClass(Annotation annotation) {
         typeAnnotations.add(annotation);
         return this;
     }
@@ -107,8 +112,7 @@ public class SolderAnnotatedTypeBuilder<X> {
      * @param annotationType the annotation type to remove
      * @throws IllegalArgumentException if the annotationType
      */
-    public SolderAnnotatedTypeBuilder<X> removeFromClass(Class<? extends Annotation> annotationType)
-    {
+    public SolderAnnotatedTypeBuilder<X> removeFromClass(Class<? extends Annotation> annotationType) {
         typeAnnotations.remove(annotationType);
         return this;
     }
@@ -121,10 +125,8 @@ public class SolderAnnotatedTypeBuilder<X> {
      * @param annotation the annotation to add
      * @throws IllegalArgumentException if the annotation is null
      */
-    public SolderAnnotatedTypeBuilder<X> addToField(Field field, Annotation annotation)
-    {
-        if (fields.get(field) == null)
-        {
+    public SolderAnnotatedTypeBuilder<X> addToField(Field field, Annotation annotation) {
+        if (fields.get(field) == null) {
             fields.put(field, new AnnotationBuilder());
         }
         fields.get(field).add(annotation);
@@ -139,8 +141,7 @@ public class SolderAnnotatedTypeBuilder<X> {
      * @param annotation the annotation to add
      * @throws IllegalArgumentException if the annotation is null
      */
-    public SolderAnnotatedTypeBuilder<X> addToField(AnnotatedField<? super X> field, Annotation annotation)
-    {
+    public SolderAnnotatedTypeBuilder<X> addToField(AnnotatedField<? super X> field, Annotation annotation) {
         return addToField(field.getJavaMember(), annotation);
     }
 
@@ -152,14 +153,10 @@ public class SolderAnnotatedTypeBuilder<X> {
      * @throws IllegalArgumentException if the annotationType is null or if the
      *                                  field is not currently declared on the type
      */
-    public SolderAnnotatedTypeBuilder<X> removeFromField(Field field, Class<? extends Annotation> annotationType)
-    {
-        if (fields.get(field) == null)
-        {
+    public SolderAnnotatedTypeBuilder<X> removeFromField(Field field, Class<? extends Annotation> annotationType) {
+        if (fields.get(field) == null) {
             throw new IllegalArgumentException("field " + field + " not present on class " + getJavaClass());
-        }
-        else
-        {
+        } else {
             fields.get(field).remove(annotationType);
         }
         return this;
@@ -174,8 +171,7 @@ public class SolderAnnotatedTypeBuilder<X> {
      *                                  field is not currently declared on the type
      */
     public SolderAnnotatedTypeBuilder<X> removeFromField(AnnotatedField<? super X> field,
-                                                   Class<? extends Annotation> annotationType)
-    {
+                                                         Class<? extends Annotation> annotationType) {
         return removeFromField(field.getJavaMember(), annotationType);
     }
 
@@ -187,10 +183,8 @@ public class SolderAnnotatedTypeBuilder<X> {
      * @param annotation the annotation to add
      * @throws IllegalArgumentException if the annotation is null
      */
-    public SolderAnnotatedTypeBuilder<X> addToMethod(Method method, Annotation annotation)
-    {
-        if (methods.get(method) == null)
-        {
+    public SolderAnnotatedTypeBuilder<X> addToMethod(Method method, Annotation annotation) {
+        if (methods.get(method) == null) {
             methods.put(method, new AnnotationBuilder());
         }
         methods.get(method).add(annotation);
@@ -205,8 +199,7 @@ public class SolderAnnotatedTypeBuilder<X> {
      * @param annotation the annotation to add
      * @throws IllegalArgumentException if the annotation is null
      */
-    public SolderAnnotatedTypeBuilder<X> addToMethod(AnnotatedMethod<? super X> method, Annotation annotation)
-    {
+    public SolderAnnotatedTypeBuilder<X> addToMethod(AnnotatedMethod<? super X> method, Annotation annotation) {
         return addToMethod(method.getJavaMember(), annotation);
     }
 
@@ -218,14 +211,10 @@ public class SolderAnnotatedTypeBuilder<X> {
      * @throws IllegalArgumentException if the annotationType is null or if the
      *                                  method is not currently declared on the type
      */
-    public SolderAnnotatedTypeBuilder<X> removeFromMethod(Method method, Class<? extends Annotation> annotationType)
-    {
-        if (methods.get(method) == null)
-        {
+    public SolderAnnotatedTypeBuilder<X> removeFromMethod(Method method, Class<? extends Annotation> annotationType) {
+        if (methods.get(method) == null) {
             throw new IllegalArgumentException("Method " + method + " not present on class" + getJavaClass());
-        }
-        else
-        {
+        } else {
             methods.get(method).remove(annotationType);
         }
         return this;
@@ -240,8 +229,7 @@ public class SolderAnnotatedTypeBuilder<X> {
      *                                  method is not currently declared on the type
      */
     public SolderAnnotatedTypeBuilder<X> removeFromMethod(AnnotatedMethod<? super X> method,
-                                                    Class<? extends Annotation> annotationType)
-    {
+                                                          Class<? extends Annotation> annotationType) {
         return removeFromMethod(method.getJavaMember(), annotationType);
     }
 
@@ -255,18 +243,14 @@ public class SolderAnnotatedTypeBuilder<X> {
      * @param annotation the annotation to add
      * @throws IllegalArgumentException if the annotation is null
      */
-    public SolderAnnotatedTypeBuilder<X> addToMethodParameter(Method method, int position, Annotation annotation)
-    {
-        if (!methods.containsKey(method))
-        {
+    public SolderAnnotatedTypeBuilder<X> addToMethodParameter(Method method, int position, Annotation annotation) {
+        if (!methods.containsKey(method)) {
             methods.put(method, new AnnotationBuilder());
         }
-        if (methodParameters.get(method) == null)
-        {
+        if (methodParameters.get(method) == null) {
             methodParameters.put(method, new HashMap<Integer, AnnotationBuilder>());
         }
-        if (methodParameters.get(method).get(position) == null)
-        {
+        if (methodParameters.get(method).get(position) == null) {
             methodParameters.get(method).put(position, new AnnotationBuilder());
         }
         methodParameters.get(method).get(position).add(annotation);
@@ -284,22 +268,15 @@ public class SolderAnnotatedTypeBuilder<X> {
      *                                  parameter is not declared on the method
      */
     public SolderAnnotatedTypeBuilder<X> removeFromMethodParameter(Method method,
-                                                             int position, Class<? extends Annotation> annotationType)
-    {
-        if (methods.get(method) == null)
-        {
+                                                                   int position, Class<? extends Annotation> annotationType) {
+        if (methods.get(method) == null) {
             throw new IllegalArgumentException("Method " + method + " not present on class " + getJavaClass());
-        }
-        else
-        {
-            if (methodParameters.get(method).get(position) == null)
-            {
+        } else {
+            if (methodParameters.get(method).get(position) == null) {
                 throw new IllegalArgumentException(
                         String.format("parameter %s not present on method %s declared on class %s",
                                 method, position, getJavaClass()));
-            }
-            else
-            {
+            } else {
                 methodParameters.get(method).get(position).remove(annotationType);
             }
         }
@@ -314,10 +291,8 @@ public class SolderAnnotatedTypeBuilder<X> {
      * @param annotation  the annotation to add
      * @throws IllegalArgumentException if the annotation is null
      */
-    public SolderAnnotatedTypeBuilder<X> addToConstructor(Constructor<X> constructor, Annotation annotation)
-    {
-        if (constructors.get(constructor) == null)
-        {
+    public SolderAnnotatedTypeBuilder<X> addToConstructor(Constructor<X> constructor, Annotation annotation) {
+        if (constructors.get(constructor) == null) {
             constructors.put(constructor, new AnnotationBuilder());
         }
         constructors.get(constructor).add(annotation);
@@ -332,8 +307,7 @@ public class SolderAnnotatedTypeBuilder<X> {
      * @param annotation  the annotation to add
      * @throws IllegalArgumentException if the annotation is null
      */
-    public SolderAnnotatedTypeBuilder<X> addToConstructor(AnnotatedConstructor<X> constructor, Annotation annotation)
-    {
+    public SolderAnnotatedTypeBuilder<X> addToConstructor(AnnotatedConstructor<X> constructor, Annotation annotation) {
         return addToConstructor(constructor.getJavaMember(), annotation);
     }
 
@@ -346,10 +320,8 @@ public class SolderAnnotatedTypeBuilder<X> {
      *                                  constructor is not currently declared on the type
      */
     public SolderAnnotatedTypeBuilder<X> removeFromConstructor(Constructor<X> constructor,
-                                                         Class<? extends Annotation> annotationType)
-    {
-        if (constructors.get(constructor) != null)
-        {
+                                                               Class<? extends Annotation> annotationType) {
+        if (constructors.get(constructor) != null) {
             constructors.get(constructor).remove(annotationType);
         }
         return this;
@@ -365,8 +337,7 @@ public class SolderAnnotatedTypeBuilder<X> {
      *                                  not currently declared on the type
      */
     public SolderAnnotatedTypeBuilder<X> removeFromConstructor(AnnotatedConstructor<X> constructor,
-                                                         Class<? extends Annotation> annotationType)
-    {
+                                                               Class<? extends Annotation> annotationType) {
         return removeFromConstructor(constructor.getJavaMember(), annotationType);
     }
 
@@ -381,19 +352,15 @@ public class SolderAnnotatedTypeBuilder<X> {
      * @throws IllegalArgumentException if the annotation is null
      */
     public SolderAnnotatedTypeBuilder<X> addToConstructorParameter(Constructor<X> constructor,
-                                                             int position,
-                                                             Annotation annotation)
-    {
-        if (!constructors.containsKey(constructor))
-        {
+                                                                   int position,
+                                                                   Annotation annotation) {
+        if (!constructors.containsKey(constructor)) {
             constructors.put(constructor, new AnnotationBuilder());
         }
-        if (constructorParameters.get(constructor) == null)
-        {
+        if (constructorParameters.get(constructor) == null) {
             constructorParameters.put(constructor, new HashMap<Integer, AnnotationBuilder>());
         }
-        if (constructorParameters.get(constructor).get(position) == null)
-        {
+        if (constructorParameters.get(constructor).get(position) == null) {
             constructorParameters.get(constructor).put(position, new AnnotationBuilder());
         }
         constructorParameters.get(constructor).get(position).add(annotation);
@@ -411,12 +378,10 @@ public class SolderAnnotatedTypeBuilder<X> {
      *                                  parameter is not declared on the constructor
      */
     public SolderAnnotatedTypeBuilder<X> removeFromConstructorParameter(Constructor<X> constructor,
-                                                                  int position,
-                                                                  Class<? extends Annotation> annotationType)
-    {
+                                                                        int position,
+                                                                        Class<? extends Annotation> annotationType) {
         if (constructorParameters.get(constructor) != null &&
-                constructorParameters.get(constructor).get(position) != null)
-        {
+                constructorParameters.get(constructor).get(position) != null) {
             constructorParameters.get(constructor).get(position).remove(annotationType);
         }
         return this;
@@ -433,21 +398,16 @@ public class SolderAnnotatedTypeBuilder<X> {
      *                                  constructor or a method
      */
     public SolderAnnotatedTypeBuilder<X> removeFromParameter(AnnotatedParameter<? super X> parameter,
-                                                       Class<? extends Annotation> annotationType)
-    {
-        if (parameter.getDeclaringCallable().getJavaMember() instanceof Method)
-        {
+                                                             Class<? extends Annotation> annotationType) {
+        if (parameter.getDeclaringCallable().getJavaMember() instanceof Method) {
             Method method = (Method) parameter.getDeclaringCallable().getJavaMember();
             return removeFromMethodParameter(method, parameter.getPosition(), annotationType);
         }
-        if (parameter.getDeclaringCallable().getJavaMember() instanceof Constructor<?>)
-        {
+        if (parameter.getDeclaringCallable().getJavaMember() instanceof Constructor<?>) {
             @SuppressWarnings("unchecked")
             Constructor<X> constructor = (Constructor<X>) parameter.getDeclaringCallable().getJavaMember();
             return removeFromConstructorParameter(constructor, parameter.getPosition(), annotationType);
-        }
-        else
-        {
+        } else {
             throw new IllegalArgumentException("Cannot remove from parameter " + parameter +
                     " - cannot operate on member " + parameter.getDeclaringCallable().getJavaMember());
         }
@@ -463,21 +423,16 @@ public class SolderAnnotatedTypeBuilder<X> {
      * @throws IllegalArgumentException if the annotation is null or if the
      *                                  parameter is not declared on either a constructor or a method
      */
-    public SolderAnnotatedTypeBuilder<X> addToParameter(AnnotatedParameter<? super X> parameter, Annotation annotation)
-    {
-        if (parameter.getDeclaringCallable().getJavaMember() instanceof Method)
-        {
+    public SolderAnnotatedTypeBuilder<X> addToParameter(AnnotatedParameter<? super X> parameter, Annotation annotation) {
+        if (parameter.getDeclaringCallable().getJavaMember() instanceof Method) {
             Method method = (Method) parameter.getDeclaringCallable().getJavaMember();
             return addToMethodParameter(method, parameter.getPosition(), annotation);
         }
-        if (parameter.getDeclaringCallable().getJavaMember() instanceof Constructor<?>)
-        {
+        if (parameter.getDeclaringCallable().getJavaMember() instanceof Constructor<?>) {
             @SuppressWarnings("unchecked")
             Constructor<X> constructor = (Constructor<X>) parameter.getDeclaringCallable().getJavaMember();
             return addToConstructorParameter(constructor, parameter.getPosition(), annotation);
-        }
-        else
-        {
+        } else {
             throw new IllegalArgumentException("Cannot remove from parameter " + parameter +
                     " - cannot operate on member " + parameter.getDeclaringCallable().getJavaMember());
         }
@@ -491,36 +446,27 @@ public class SolderAnnotatedTypeBuilder<X> {
      * @param annotationType the type of annotation to remove
      * @throws IllegalArgumentException if the annotationType is null
      */
-    public SolderAnnotatedTypeBuilder<X> removeFromAll(Class<? extends Annotation> annotationType)
-    {
-        if (annotationType == null)
-        {
+    public SolderAnnotatedTypeBuilder<X> removeFromAll(Class<? extends Annotation> annotationType) {
+        if (annotationType == null) {
             throw new IllegalArgumentException(String.format("%s parameter must not be null", "annotationType"));
         }
         removeFromClass(annotationType);
-        for (Map.Entry<Field, AnnotationBuilder> field : fields.entrySet())
-        {
+        for (Map.Entry<Field, AnnotationBuilder> field : fields.entrySet()) {
             field.getValue().remove(annotationType);
         }
-        for (Map.Entry<Method, AnnotationBuilder> method : methods.entrySet())
-        {
+        for (Map.Entry<Method, AnnotationBuilder> method : methods.entrySet()) {
             method.getValue().remove(annotationType);
-            if (methodParameters.get(method.getKey()) != null)
-            {
-                for (Map.Entry<Integer, AnnotationBuilder> parameter : methodParameters.get(method.getKey()).entrySet())
-                {
+            if (methodParameters.get(method.getKey()) != null) {
+                for (Map.Entry<Integer, AnnotationBuilder> parameter : methodParameters.get(method.getKey()).entrySet()) {
                     parameter.getValue().remove(annotationType);
                 }
             }
         }
-        for (Map.Entry<Constructor<?>, AnnotationBuilder> constructor : constructors.entrySet())
-        {
+        for (Map.Entry<Constructor<?>, AnnotationBuilder> constructor : constructors.entrySet()) {
             constructor.getValue().remove(annotationType);
-            if (constructorParameters.get(constructor.getKey()) != null)
-            {
+            if (constructorParameters.get(constructor.getKey()) != null) {
                 for (Map.Entry<Integer, AnnotationBuilder> parameter :
-                        constructorParameters.get(constructor.getKey()).entrySet())
-                {
+                        constructorParameters.get(constructor.getKey()).entrySet()) {
                     parameter.getValue().remove(annotationType);
                 }
             }
@@ -536,8 +482,7 @@ public class SolderAnnotatedTypeBuilder<X> {
      * @param type the type to read from
      * @throws IllegalArgumentException if type is null
      */
-    public SolderAnnotatedTypeBuilder<X> readFromType(AnnotatedType<X> type)
-    {
+    public SolderAnnotatedTypeBuilder<X> readFromType(AnnotatedType<X> type) {
         return readFromType(type, true);
     }
 
@@ -552,64 +497,49 @@ public class SolderAnnotatedTypeBuilder<X> {
      *                  annotation
      * @throws IllegalArgumentException if type is null
      */
-    public SolderAnnotatedTypeBuilder<X> readFromType(AnnotatedType<X> type, boolean overwrite)
-    {
-        if (type == null)
-        {
+    public SolderAnnotatedTypeBuilder<X> readFromType(AnnotatedType<X> type, boolean overwrite) {
+        if (type == null) {
             throw new IllegalArgumentException(String.format("%s parameter must not be null", "type"));
         }
-        if (javaClass == null || overwrite)
-        {
+        if (javaClass == null || overwrite) {
             javaClass = type.getJavaClass();
         }
         mergeAnnotationsOnElement(type, overwrite, typeAnnotations);
-        for (AnnotatedField<? super X> field : type.getFields())
-        {
-            if (fields.get(field.getJavaMember()) == null)
-            {
+        for (AnnotatedField<? super X> field : type.getFields()) {
+            if (fields.get(field.getJavaMember()) == null) {
                 fields.put(field.getJavaMember(), new AnnotationBuilder());
             }
             mergeAnnotationsOnElement(field, overwrite, fields.get(field.getJavaMember()));
         }
-        for (AnnotatedMethod<? super X> method : type.getMethods())
-        {
-            if (methods.get(method.getJavaMember()) == null)
-            {
+        for (AnnotatedMethod<? super X> method : type.getMethods()) {
+            if (methods.get(method.getJavaMember()) == null) {
                 methods.put(method.getJavaMember(), new AnnotationBuilder());
             }
             mergeAnnotationsOnElement(method, overwrite, methods.get(method.getJavaMember()));
-            for (AnnotatedParameter<? super X> p : method.getParameters())
-            {
-                if (methodParameters.get(method.getJavaMember()) == null)
-                {
+            for (AnnotatedParameter<? super X> p : method.getParameters()) {
+                if (methodParameters.get(method.getJavaMember()) == null) {
                     methodParameters.put(method.getJavaMember(), new HashMap<Integer, AnnotationBuilder>());
                 }
-                if (methodParameters.get(method.getJavaMember()).get(p.getPosition()) == null)
-                {
+                if (methodParameters.get(method.getJavaMember()).get(p.getPosition()) == null) {
                     methodParameters.get(method.getJavaMember()).put(p.getPosition(), new AnnotationBuilder());
                 }
                 mergeAnnotationsOnElement(
                         p, overwrite, methodParameters.get(method.getJavaMember()).get(p.getPosition()));
             }
         }
-        for (AnnotatedConstructor<? super X> constructor : type.getConstructors())
-        {
-            if (constructors.get(constructor.getJavaMember()) == null)
-            {
+        for (AnnotatedConstructor<? super X> constructor : type.getConstructors()) {
+            if (constructors.get(constructor.getJavaMember()) == null) {
                 constructors.put(constructor.getJavaMember(), new AnnotationBuilder());
             }
             mergeAnnotationsOnElement(constructor, overwrite, constructors.get(constructor.getJavaMember()));
-            for (AnnotatedParameter<? super X> p : constructor.getParameters())
-            {
+            for (AnnotatedParameter<? super X> p : constructor.getParameters()) {
                 if (constructorParameters.get(
-                        constructor.getJavaMember()) == null)
-                {
+                        constructor.getJavaMember()) == null) {
                     constructorParameters.put(
                             constructor.getJavaMember(), new HashMap<Integer, AnnotationBuilder>());
                 }
                 if (constructorParameters.get(
-                        constructor.getJavaMember()).get(p.getPosition()) == null)
-                {
+                        constructor.getJavaMember()).get(p.getPosition()) == null) {
                     constructorParameters.get(
                             constructor.getJavaMember()).put(p.getPosition(), new AnnotationBuilder());
                 }
@@ -627,8 +557,7 @@ public class SolderAnnotatedTypeBuilder<X> {
      * @param type the type to read from
      * @throws IllegalArgumentException if type is null
      */
-    public SolderAnnotatedTypeBuilder<X> readFromType(Class<X> type)
-    {
+    public SolderAnnotatedTypeBuilder<X> readFromType(Class<X> type) {
         return readFromType(type, true);
     }
 
@@ -640,135 +569,102 @@ public class SolderAnnotatedTypeBuilder<X> {
      * @param overwrite if true, the read annotation will replace any existing
      *                  annotation
      */
-    public SolderAnnotatedTypeBuilder<X> readFromType(Class<X> type, boolean overwrite)
-    {
-        if (type == null)
-        {
+    public SolderAnnotatedTypeBuilder<X> readFromType(Class<X> type, boolean overwrite) {
+        if (type == null) {
             throw new IllegalArgumentException(String.format("%s parameter must not be null", "type"));
         }
-        if (javaClass == null || overwrite)
-        {
+        if (javaClass == null || overwrite) {
             javaClass = type;
         }
-        for (Annotation annotation : type.getAnnotations())
-        {
-            if (overwrite || !typeAnnotations.isAnnotationPresent(annotation.annotationType()))
-            {
+        for (Annotation annotation : type.getAnnotations()) {
+            if (overwrite || !typeAnnotations.isAnnotationPresent(annotation.annotationType())) {
                 typeAnnotations.add(annotation);
             }
         }
 
-        for (Field field : ReflectionUtils.getAllDeclaredFields(type))
-        {
+        for (Field field : ReflectionUtils.getAllDeclaredFields(type)) {
             AnnotationBuilder annotationBuilder = fields.get(field);
-            if (annotationBuilder == null)
-            {
+            if (annotationBuilder == null) {
                 annotationBuilder = new AnnotationBuilder();
                 fields.put(field, annotationBuilder);
             }
 
-            if (System.getSecurityManager() != null)
-            {
+            if (System.getSecurityManager() != null) {
                 AccessController.doPrivileged(new SetAccessiblePrivilegedAction(field));
-            }
-            else
-            {
+            } else {
                 field.setAccessible(true);
             }
 
-            for (Annotation annotation : field.getAnnotations())
-            {
-                if (overwrite || !annotationBuilder.isAnnotationPresent(annotation.annotationType()))
-                {
+            for (Annotation annotation : field.getAnnotations()) {
+                if (overwrite || !annotationBuilder.isAnnotationPresent(annotation.annotationType())) {
                     annotationBuilder.add(annotation);
                 }
             }
         }
 
-        for (Method method : ReflectionUtils.getAllDeclaredMethods(type))
-        {
+        for (Method method : ReflectionUtils.getAllDeclaredMethods(type)) {
             AnnotationBuilder annotationBuilder = methods.get(method);
-            if (annotationBuilder == null)
-            {
+            if (annotationBuilder == null) {
                 annotationBuilder = new AnnotationBuilder();
                 methods.put(method, annotationBuilder);
             }
 
-            if (System.getSecurityManager() != null)
-            {
+            if (System.getSecurityManager() != null) {
                 AccessController.doPrivileged(new SetAccessiblePrivilegedAction(method));
-            }
-            else
-            {
+            } else {
                 method.setAccessible(true);
             }
 
-            for (Annotation annotation : method.getAnnotations())
-            {
-                if (overwrite || !annotationBuilder.isAnnotationPresent(annotation.annotationType()))
-                {
+            for (Annotation annotation : method.getAnnotations()) {
+                if (overwrite || !annotationBuilder.isAnnotationPresent(annotation.annotationType())) {
                     annotationBuilder.add(annotation);
                 }
             }
 
             Map<Integer, AnnotationBuilder> parameters = methodParameters.get(method);
-            if (parameters == null)
-            {
+            if (parameters == null) {
                 parameters = new HashMap<Integer, AnnotationBuilder>();
                 methodParameters.put(method, parameters);
             }
-            for (int i = 0; i < method.getParameterTypes().length; ++i)
-            {
+            for (int i = 0; i < method.getParameterTypes().length; ++i) {
                 AnnotationBuilder parameterAnnotationBuilder = parameters.get(i);
-                if (parameterAnnotationBuilder == null)
-                {
+                if (parameterAnnotationBuilder == null) {
                     parameterAnnotationBuilder = new AnnotationBuilder();
                     parameters.put(i, parameterAnnotationBuilder);
                 }
-                for (Annotation annotation : method.getParameterAnnotations()[i])
-                {
-                    if (overwrite || !parameterAnnotationBuilder.isAnnotationPresent(annotation.annotationType()))
-                    {
+                for (Annotation annotation : method.getParameterAnnotations()[i]) {
+                    if (overwrite || !parameterAnnotationBuilder.isAnnotationPresent(annotation.annotationType())) {
                         parameterAnnotationBuilder.add(annotation);
                     }
                 }
             }
         }
 
-        for (Constructor<?> constructor : type.getDeclaredConstructors())
-        {
+        for (Constructor<?> constructor : type.getDeclaredConstructors()) {
             AnnotationBuilder annotationBuilder = constructors.get(constructor);
-            if (annotationBuilder == null)
-            {
+            if (annotationBuilder == null) {
                 annotationBuilder = new AnnotationBuilder();
                 constructors.put(constructor, annotationBuilder);
             }
             constructor.setAccessible(true);
-            for (Annotation annotation : constructor.getAnnotations())
-            {
-                if (overwrite || !annotationBuilder.isAnnotationPresent(annotation.annotationType()))
-                {
+            for (Annotation annotation : constructor.getAnnotations()) {
+                if (overwrite || !annotationBuilder.isAnnotationPresent(annotation.annotationType())) {
                     annotationBuilder.add(annotation);
                 }
             }
             Map<Integer, AnnotationBuilder> mparams = constructorParameters.get(constructor);
-            if (mparams == null)
-            {
+            if (mparams == null) {
                 mparams = new HashMap<Integer, AnnotationBuilder>();
                 constructorParameters.put(constructor, mparams);
             }
-            for (int i = 0; i < constructor.getParameterTypes().length; ++i)
-            {
+            for (int i = 0; i < constructor.getParameterTypes().length; ++i) {
                 AnnotationBuilder parameterAnnotationBuilder = mparams.get(i);
-                if (parameterAnnotationBuilder == null)
-                {
+                if (parameterAnnotationBuilder == null) {
                     parameterAnnotationBuilder = new AnnotationBuilder();
                     mparams.put(i, parameterAnnotationBuilder);
                 }
-                for (Annotation annotation : constructor.getParameterAnnotations()[i])
-                {
-                    if (overwrite || !parameterAnnotationBuilder.isAnnotationPresent(annotation.annotationType()))
-                    {
+                for (Annotation annotation : constructor.getParameterAnnotations()[i]) {
+                    if (overwrite || !parameterAnnotationBuilder.isAnnotationPresent(annotation.annotationType())) {
                         annotationBuilder.add(annotation);
                     }
                 }
@@ -779,20 +675,14 @@ public class SolderAnnotatedTypeBuilder<X> {
 
     protected void mergeAnnotationsOnElement(Annotated annotated,
                                              boolean overwriteExisting,
-                                             AnnotationBuilder typeAnnotations)
-    {
-        for (Annotation annotation : annotated.getAnnotations())
-        {
-            if (typeAnnotations.getAnnotation(annotation.annotationType()) != null)
-            {
-                if (overwriteExisting)
-                {
+                                             AnnotationBuilder typeAnnotations) {
+        for (Annotation annotation : annotated.getAnnotations()) {
+            if (typeAnnotations.getAnnotation(annotation.annotationType()) != null) {
+                if (overwriteExisting) {
                     typeAnnotations.remove(annotation.annotationType());
                     typeAnnotations.add(annotation);
                 }
-            }
-            else
-            {
+            } else {
                 typeAnnotations.add(annotation);
             }
         }
@@ -803,8 +693,7 @@ public class SolderAnnotatedTypeBuilder<X> {
      * underlying class and not overridden by the builder will be automatically
      * added.
      */
-    public AnnotatedType<X> create()
-    {
+    public AnnotatedType<X> create() {
         Map<Constructor<?>, Map<Integer, AnnotationStore>> constructorParameterAnnotations =
                 new HashMap<Constructor<?>, Map<Integer, AnnotationStore>>();
         Map<Constructor<?>, AnnotationStore> constructorAnnotations =
@@ -816,35 +705,28 @@ public class SolderAnnotatedTypeBuilder<X> {
         Map<Field, AnnotationStore> fieldAnnotations =
                 new HashMap<Field, AnnotationStore>();
 
-        for (Map.Entry<Field, AnnotationBuilder> field : fields.entrySet())
-        {
+        for (Map.Entry<Field, AnnotationBuilder> field : fields.entrySet()) {
             fieldAnnotations.put(field.getKey(), field.getValue().create());
         }
 
-        for (Map.Entry<Method, AnnotationBuilder> method : methods.entrySet())
-        {
+        for (Map.Entry<Method, AnnotationBuilder> method : methods.entrySet()) {
             methodAnnotations.put(method.getKey(), method.getValue().create());
         }
-        for (Map.Entry<Method, Map<Integer, AnnotationBuilder>> parameters : methodParameters.entrySet())
-        {
+        for (Map.Entry<Method, Map<Integer, AnnotationBuilder>> parameters : methodParameters.entrySet()) {
             Map<Integer, AnnotationStore> parameterAnnotations = new HashMap<Integer, AnnotationStore>();
             methodParameterAnnotations.put(parameters.getKey(), parameterAnnotations);
-            for (Map.Entry<Integer, AnnotationBuilder> parameter : parameters.getValue().entrySet())
-            {
+            for (Map.Entry<Integer, AnnotationBuilder> parameter : parameters.getValue().entrySet()) {
                 parameterAnnotations.put(parameter.getKey(), parameter.getValue().create());
             }
         }
 
-        for (Map.Entry<Constructor<?>, AnnotationBuilder> constructor : constructors.entrySet())
-        {
+        for (Map.Entry<Constructor<?>, AnnotationBuilder> constructor : constructors.entrySet()) {
             constructorAnnotations.put(constructor.getKey(), constructor.getValue().create());
         }
-        for (Map.Entry<Constructor<?>, Map<Integer, AnnotationBuilder>> parameters : constructorParameters.entrySet())
-        {
+        for (Map.Entry<Constructor<?>, Map<Integer, AnnotationBuilder>> parameters : constructorParameters.entrySet()) {
             Map<Integer, AnnotationStore> parameterAnnotations = new HashMap<Integer, AnnotationStore>();
             constructorParameterAnnotations.put(parameters.getKey(), parameterAnnotations);
-            for (Map.Entry<Integer, AnnotationBuilder> parameter : parameters.getValue().entrySet())
-            {
+            for (Map.Entry<Integer, AnnotationBuilder> parameter : parameters.getValue().entrySet()) {
                 parameterAnnotations.put(parameter.getKey(), parameter.getValue().create());
             }
         }
@@ -861,14 +743,11 @@ public class SolderAnnotatedTypeBuilder<X> {
      * @param type  the new type of the field
      * @throws IllegalArgumentException if field or type is null
      */
-    public void overrideFieldType(Field field, Type type)
-    {
-        if (field == null)
-        {
+    public void overrideFieldType(Field field, Type type) {
+        if (field == null) {
             throw new IllegalArgumentException(String.format("%s parameter must not be null", "field"));
         }
-        if (type == null)
-        {
+        if (type == null) {
             throw new IllegalArgumentException(String.format("%s parameter must not be null", "type"));
         }
         fieldTypes.put(field, type);
@@ -881,8 +760,7 @@ public class SolderAnnotatedTypeBuilder<X> {
      * @param type  the new type of the field
      * @throws IllegalArgumentException if field or type is null
      */
-    public void overrideFieldType(AnnotatedField<? super X> field, Type type)
-    {
+    public void overrideFieldType(AnnotatedField<? super X> field, Type type) {
         overrideFieldType(field.getJavaMember(), type);
     }
 
@@ -894,18 +772,14 @@ public class SolderAnnotatedTypeBuilder<X> {
      * @param type     the new type of the parameter
      * @throws IllegalArgumentException if parameter or type is null
      */
-    public SolderAnnotatedTypeBuilder<X> overrideMethodParameterType(Method method, int position, Type type)
-    {
-        if (method == null)
-        {
+    public SolderAnnotatedTypeBuilder<X> overrideMethodParameterType(Method method, int position, Type type) {
+        if (method == null) {
             throw new IllegalArgumentException(String.format("%s parameter must not be null", "method"));
         }
-        if (type == null)
-        {
+        if (type == null) {
             throw new IllegalArgumentException(String.format("%s parameter must not be null", "type"));
         }
-        if (methodParameterTypes.get(method) == null)
-        {
+        if (methodParameterTypes.get(method) == null) {
             methodParameterTypes.put(method, new HashMap<Integer, Type>());
         }
         methodParameterTypes.get(method).put(position, type);
@@ -920,18 +794,14 @@ public class SolderAnnotatedTypeBuilder<X> {
      * @param type        the new type of the parameter
      * @throws IllegalArgumentException if parameter or type is null
      */
-    public SolderAnnotatedTypeBuilder<X> overrideConstructorParameterType(Constructor<X> constructor, int position, Type type)
-    {
-        if (constructor == null)
-        {
+    public SolderAnnotatedTypeBuilder<X> overrideConstructorParameterType(Constructor<X> constructor, int position, Type type) {
+        if (constructor == null) {
             throw new IllegalArgumentException(String.format("%s parameter must not be null", "constructor"));
         }
-        if (type == null)
-        {
+        if (type == null) {
             throw new IllegalArgumentException(String.format("%s parameter must not be null", "type"));
         }
-        if (constructorParameterTypes.get(constructor) == null)
-        {
+        if (constructorParameterTypes.get(constructor) == null) {
             constructorParameterTypes.put(constructor, new HashMap<Integer, Type>());
         }
         constructorParameterTypes.get(constructor).put(position, type);
@@ -945,21 +815,16 @@ public class SolderAnnotatedTypeBuilder<X> {
      * @param type      the new type of the parameter
      * @throws IllegalArgumentException if parameter or type is null
      */
-    public SolderAnnotatedTypeBuilder<X> overrideParameterType(AnnotatedParameter<? super X> parameter, Type type)
-    {
-        if (parameter.getDeclaringCallable().getJavaMember() instanceof Method)
-        {
+    public SolderAnnotatedTypeBuilder<X> overrideParameterType(AnnotatedParameter<? super X> parameter, Type type) {
+        if (parameter.getDeclaringCallable().getJavaMember() instanceof Method) {
             Method method = (Method) parameter.getDeclaringCallable().getJavaMember();
             return overrideMethodParameterType(method, parameter.getPosition(), type);
         }
-        if (parameter.getDeclaringCallable().getJavaMember() instanceof Constructor<?>)
-        {
+        if (parameter.getDeclaringCallable().getJavaMember() instanceof Constructor<?>) {
             @SuppressWarnings("unchecked")
             Constructor<X> constructor = (Constructor<X>) parameter.getDeclaringCallable().getJavaMember();
             return overrideConstructorParameterType(constructor, parameter.getPosition(), type);
-        }
-        else
-        {
+        } else {
             throw new IllegalArgumentException("Cannot remove from parameter " + parameter +
                     " - cannot operate on member " + parameter.getDeclaringCallable().getJavaMember());
         }
@@ -968,20 +833,18 @@ public class SolderAnnotatedTypeBuilder<X> {
     /**
      * getter for the class
      */
-    public Class<X> getJavaClass()
-    {
+    public Class<X> getJavaClass() {
         return javaClass;
     }
 
     /**
      * setter for the class
      */
-    public SolderAnnotatedTypeBuilder<X> setJavaClass(Class<X> javaClass)
-    {
+    public SolderAnnotatedTypeBuilder<X> setJavaClass(Class<X> javaClass) {
         this.javaClass = javaClass;
         return this;
     }
-    
+
     /**
      * Redefine any annotations of the specified type. The redefinition callback
      * will be invoked for any annotation on the type definition or any of it's
@@ -1034,5 +897,5 @@ public class SolderAnnotatedTypeBuilder<X> {
             redefinition.redefine(new RedefinitionContext<A>(annotated, baseType, builder, elementName));
         }
     }
-	
+
 }

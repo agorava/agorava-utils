@@ -1,13 +1,12 @@
 /*
- * JBoss, Home of Professional Open Source
- * Copyright 2011, Red Hat, Inc. and/or its affiliates, and individual
- * contributors by the @authors tag. See the copyright.txt in the
- * distribution for a full listing of individual contributors.
+ * Copyright 2012 Agorava
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,49 +14,6 @@
  * limitations under the License.
  */
 package org.agorava.utils.solder.bean.generic;
-
-import static org.agorava.utils.solder.reflection.AnnotationInspector.getAnnotations;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.Field;
-import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import javax.enterprise.context.Dependent;
-import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Alternative;
-import javax.enterprise.inject.Disposes;
-import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.spi.AfterBeanDiscovery;
-import javax.enterprise.inject.spi.AfterDeploymentValidation;
-import javax.enterprise.inject.spi.Annotated;
-import javax.enterprise.inject.spi.AnnotatedField;
-import javax.enterprise.inject.spi.AnnotatedMember;
-import javax.enterprise.inject.spi.AnnotatedMethod;
-import javax.enterprise.inject.spi.AnnotatedParameter;
-import javax.enterprise.inject.spi.AnnotatedType;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.Extension;
-import javax.enterprise.inject.spi.InjectionTarget;
-import javax.enterprise.inject.spi.ObserverMethod;
-import javax.enterprise.inject.spi.ProcessAnnotatedType;
-import javax.enterprise.inject.spi.ProcessBean;
-import javax.enterprise.inject.spi.ProcessInjectionTarget;
-import javax.enterprise.inject.spi.ProcessManagedBean;
-import javax.enterprise.inject.spi.ProcessObserverMethod;
-import javax.enterprise.inject.spi.ProcessProducerField;
-import javax.enterprise.inject.spi.ProcessProducerMethod;
-import javax.inject.Inject;
 
 import org.agorava.utils.solder.bean.Beans;
 import org.agorava.utils.solder.bean.defaultbean.DefaultBeanInformation;
@@ -76,10 +32,28 @@ import org.agorava.utils.solder.util.collections.Supplier;
 import org.apache.deltaspike.core.util.bean.BeanBuilder;
 import org.apache.deltaspike.core.util.metadata.builder.ContextualLifecycle;
 
+import javax.enterprise.context.Dependent;
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Alternative;
+import javax.enterprise.inject.Disposes;
+import javax.enterprise.inject.Produces;
+import javax.enterprise.inject.spi.*;
+import javax.inject.Inject;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Field;
+import java.lang.reflect.Type;
+import java.util.*;
+import java.util.Map.Entry;
+
+import static org.agorava.utils.solder.reflection.AnnotationInspector.getAnnotations;
+
 /**
  * Extension that wires in Generic Beans
  *
  * @author Pete Muir
+ * @author Ove Ranheim
  * @author Stuart Douglas <stuart@baileyroberts.com.au>
  */
 public class GenericBeanExtension implements Extension {
@@ -421,7 +395,7 @@ public class GenericBeanExtension implements Extension {
                     // use the DefaultBeanInformation to obtain original qualifiers
                     qualifiers = ((DefaultBeanInformation.Literal) defaultBeanInformation).getQualifiers();
                 } else {
-                    for (Iterator<Annotation> iterator = qualifiers.iterator(); iterator.hasNext();) {
+                    for (Iterator<Annotation> iterator = qualifiers.iterator(); iterator.hasNext(); ) {
                         Annotation annotation = iterator.next();
                         if ((annotation instanceof Synthetic)
                                 && GENERIC_BEAN_EXTENSION_NAMESPACE.equals(((Synthetic) annotation).namespace())) {

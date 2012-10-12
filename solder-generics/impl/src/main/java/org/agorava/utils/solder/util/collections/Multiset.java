@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2007 Google Inc.
+ * Copyright 2012 Agorava
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,11 +16,7 @@
 
 package org.agorava.utils.solder.util.collections;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * A collection that supports order-independent equality, like {@link Set}, but
@@ -67,6 +63,7 @@ import java.util.Set;
  * implementation.
  *
  * @author Kevin Bourrillion
+ * @author Ove Ranheim
  */
 public interface Multiset<E> extends Collection<E> {
     // Query Operations

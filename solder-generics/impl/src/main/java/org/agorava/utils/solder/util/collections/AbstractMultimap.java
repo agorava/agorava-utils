@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2007 Google Inc.
+ * Copyright 2012 Agorava
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,19 +17,7 @@
 package org.agorava.utils.solder.util.collections;
 
 import java.io.Serializable;
-import java.util.AbstractCollection;
-import java.util.AbstractMap;
-import java.util.AbstractSet;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.RandomAccess;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.SortedSet;
+import java.util.*;
 
 import static org.agorava.utils.solder.util.collections.Preconditions.checkArgument;
 import static org.agorava.utils.solder.util.collections.Preconditions.checkState;
@@ -83,6 +71,7 @@ import static org.agorava.utils.solder.util.collections.Preconditions.checkState
  * readObject} and {@code writeObject} methods.
  *
  * @author Jared Levy
+ * @author Ove Ranheim
  */
 abstract class AbstractMultimap<K, V> implements Multimap<K, V>, Serializable {
     /*
