@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Agorava
+ * Copyright 2013 Agorava
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -349,6 +349,10 @@ public class GenericBeanExtension implements Extension {
     }
 
     <T, X> void registerGenericBeanObserverMethod(@Observes ProcessObserverMethod<T, X> event) {
+
+        if (event.getAnnotatedMethod() == null) {
+            return;
+        }
         AnnotatedType<X> declaringType = event.getAnnotatedMethod().getDeclaringType();
         if (declaringType.isAnnotationPresent(GenericConfiguration.class)) {
             AnnotatedMethod<X> method = event.getAnnotatedMethod();
